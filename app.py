@@ -17,6 +17,13 @@ import xgboost as xgb
 
 from statsmodels.tsa.arima.model import ARIMA
 
+
+import torch
+import torch.nn as nn
+import torch.optim as optim
+import random
+from collections import deque
+
 # ---------------- PAGE CONFIG ----------------
 st.set_page_config(
     page_title="Retail AI Intelligence",
@@ -28,900 +35,3202 @@ st.set_page_config(
 st.markdown("""
 <style>
 
-/* ---------- GLOBAL ---------- */
-body {
-    background: linear-gradient(135deg, #0f111a, #1c1f2e, #2a1a3f);
-    color: #e6e6fa;
-    font-family: 'Segoe UI', sans-serif;
+/* ==========================================================
+   EXECUTIVE AI RETAIL INTELLIGENCE PLATFORM
+   CONSULTING + ENTERPRISE GRADE UI
+========================================================== */
+
+:root{
+
+    --bg-primary:#050816;
+    --bg-secondary:#0b1220;
+    --bg-card:rgba(255,255,255,0.04);
+
+    --cyan:#22d3ee;
+    --purple:#8b5cf6;
+    --pink:#ec4899;
+
+    --text-primary:#ffffff;
+    --text-secondary:#94a3b8;
+
+    --border:rgba(255,255,255,0.08);
+
 }
 
-/* ---------- HEADER ---------- */
-h1 {
-    text-align: center;
-    font-size: 40px;
-    font-weight: 700;
-    background: linear-gradient(90deg, #00f5a0, #c471f5, #fa71cd);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+/* ==========================================================
+   APP BACKGROUND
+========================================================== */
+
+.stApp{
+
+    background:
+    radial-gradient(circle at top left,
+        rgba(139,92,246,.15),
+        transparent 35%),
+
+    radial-gradient(circle at bottom right,
+        rgba(34,211,238,.12),
+        transparent 35%),
+
+    linear-gradient(
+        135deg,
+        #050816,
+        #0b1220,
+        #111827
+    );
+
+    color:white;
 }
 
-/* ---------- SIDEBAR ---------- */
-section[data-testid="stSidebar"] {
-    background: rgba(30, 20, 50, 0.95);
-    backdrop-filter: blur(12px);
-    border-right: 1px solid rgba(255,255,255,0.1);
+/* ==========================================================
+   MAIN WRAPPER
+========================================================== */
+
+.block-container{
+
+    max-width:1400px;
+
+    padding-top:1rem;
+
+    background:
+    rgba(255,255,255,0.02);
+
+    backdrop-filter:blur(18px);
+
+    border-radius:28px;
+
+    border:1px solid rgba(255,255,255,.05);
+
+    box-shadow:
+    0 20px 60px rgba(0,0,0,.45);
 }
 
-/* ---------- METRIC CARDS (MERGED STYLE) ---------- */
+/* ==========================================================
+   PREMIUM TITLE
+========================================================== */
+
+h1{
+
+    text-align:center;
+
+    font-size:3.2rem;
+
+    font-weight:900;
+
+    letter-spacing:-1px;
+
+    background:
+    linear-gradient(
+        90deg,
+        #ffffff,
+        #c4b5fd,
+        #67e8f9
+    );
+
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+
+    margin-bottom:15px;
+}
+
+h1::after{
+
+    content:"";
+
+    display:block;
+
+    width:220px;
+
+    height:4px;
+
+    margin:14px auto;
+
+    border-radius:999px;
+
+    background:
+    linear-gradient(
+        90deg,
+        transparent,
+        var(--purple),
+        var(--cyan),
+        transparent
+    );
+}
+
+/* ==========================================================
+   SECTION HEADERS
+========================================================== */
+
+h2,h3{
+
+    color:white !important;
+
+    padding-left:15px;
+
+    border-left:5px solid var(--purple);
+
+    margin-top:25px;
+
+    font-weight:700;
+}
+
+/* ==========================================================
+   SIDEBAR
+========================================================== */
+
+section[data-testid="stSidebar"]{
+
+    background:
+    linear-gradient(
+        180deg,
+        #0f172a,
+        #111827
+    );
+
+    border-right:
+    1px solid rgba(255,255,255,.08);
+
+    box-shadow:
+    inset -1px 0 0 rgba(255,255,255,.05);
+}
+
+/* ==========================================================
+   KPI CARDS
+========================================================== */
+
+.metric-card{
+
+    background:
+    linear-gradient(
+        145deg,
+        rgba(255,255,255,.06),
+        rgba(255,255,255,.02)
+    );
+
+    border-radius:24px;
+
+    padding:28px;
+
+    border:1px solid rgba(255,255,255,.08);
+
+    backdrop-filter:blur(20px);
+
+    transition:.35s ease;
+
+    position:relative;
+
+    overflow:hidden;
+}
+
+.metric-card::before{
+
+    content:"";
+
+    position:absolute;
+
+    top:0;
+    left:0;
+
+    width:100%;
+    height:4px;
+
+    background:
+    linear-gradient(
+        90deg,
+        var(--cyan),
+        var(--purple),
+        var(--pink)
+    );
+}
+
+.metric-card:hover{
+
+    transform:translateY(-6px);
+
+    box-shadow:
+    0 15px 40px rgba(139,92,246,.25);
+}
+
+/* ==========================================================
+   TABS
+========================================================== */
+
+div[data-baseweb="tab-list"]{
+
+    background:
+    rgba(255,255,255,.03);
+
+    border-radius:18px;
+
+    padding:8px;
+
+    border:1px solid rgba(255,255,255,.05);
+}
+
+button[data-baseweb="tab"]{
+
+    border-radius:14px !important;
+
+    font-weight:700 !important;
+
+    color:#cbd5e1 !important;
+}
+
+button[data-baseweb="tab"][aria-selected="true"]{
+
+    background:
+    linear-gradient(
+        135deg,
+        #7c3aed,
+        #9333ea
+    ) !important;
+
+    color:white !important;
+
+    box-shadow:
+    0 8px 25px rgba(124,58,237,.35);
+}
+
+/* ==========================================================
+   TAB PANELS
+========================================================== */
+
+div[role="tabpanel"]{
+
+    background:
+    rgba(255,255,255,.03);
+
+    border-radius:24px;
+
+    padding:28px;
+
+    border:
+    1px solid rgba(255,255,255,.05);
+
+    backdrop-filter:blur(12px);
+}
+
+/* ==========================================================
+   EXECUTIVE BUTTONS
+========================================================== */
+
+.stButton > button{
+
+    border:none;
+
+    border-radius:14px;
+
+    height:50px;
+
+    font-weight:700;
+
+    background:
+    linear-gradient(
+        135deg,
+        #2563eb,
+        #7c3aed
+    );
+
+    transition:.3s;
+}
+
+.stButton > button:hover{
+
+    transform:translateY(-2px);
+
+    box-shadow:
+    0 10px 30px rgba(124,58,237,.35);
+}
+
+/* ==========================================================
+   PLOTLY CHART CONTAINER
+========================================================== */
+
+[data-testid="stPlotlyChart"]{
+
+    background:
+    rgba(255,255,255,.03);
+
+    border-radius:24px;
+
+    border:
+    1px solid rgba(255,255,255,.06);
+
+    padding:12px;
+
+    box-shadow:
+    0 10px 40px rgba(0,0,0,.25);
+}
+
+/* ==========================================================
+   DATAFRAME
+========================================================== */
+
+[data-testid="stDataFrame"]{
+
+    border-radius:18px;
+
+    overflow:hidden;
+
+    border:
+    1px solid rgba(255,255,255,.08);
+}
+
+/* ==========================================================
+   FILE UPLOADER
+========================================================== */
+
+[data-testid="stFileUploader"]{
+
+    border:
+    2px dashed rgba(139,92,246,.35);
+
+    border-radius:20px;
+
+    background:
+    rgba(255,255,255,.02);
+}
+
+/* ==========================================================
+   SCROLLBAR
+========================================================== */
+
+::-webkit-scrollbar{
+    width:8px;
+}
+
+::-webkit-scrollbar-thumb{
+
+    border-radius:999px;
+
+    background:
+    linear-gradient(
+        var(--purple),
+        var(--cyan)
+    );
+}
+
+/* ==========================================================
+   PREMIUM KPI CARDS
+========================================================== */
+
 .metric-card {
-    background: linear-gradient(135deg,#1f4037,#99f2c8,#5f2c82);
-    border-radius: 16px;
-    padding: 20px;
-    text-align: center;
-    color: white;
-    font-weight: bold;
-    font-size: 16px;
-    backdrop-filter: blur(12px);
-    box-shadow: 0 6px 25px rgba(0,0,0,0.6);
-    border: 1px solid rgba(255,255,255,0.1);
-    transition: 0.3s;
+
+    background:
+    linear-gradient(
+        135deg,
+        rgba(34,211,238,0.18),
+        rgba(168,85,247,0.18),
+        rgba(236,72,153,0.18)
+    );
+
+    backdrop-filter: blur(20px);
+
+    border: 1px solid rgba(255,255,255,.08);
+
+    border-radius: 24px;
+
+    padding: 24px;
+
+    min-height: 140px;
+
+    position: relative;
+
+    overflow: hidden;
+
+    transition: all .35s ease;
+
+    box-shadow:
+        0 10px 30px rgba(0,0,0,.35),
+        0 0 30px rgba(168,85,247,.15);
 }
+
+/* Top Accent Line */
+
+.metric-card::before {
+
+    content:"";
+
+    position:absolute;
+
+    top:0;
+    left:0;
+
+    width:100%;
+    height:4px;
+
+    background:
+    linear-gradient(
+        90deg,
+        #22d3ee,
+        #a855f7,
+        #ec4899
+    );
+}
+
+/* Glow Effect */
+
+.metric-card::after {
+
+    content:"";
+
+    position:absolute;
+
+    top:-50%;
+    right:-50%;
+
+    width:180px;
+    height:180px;
+
+    background:
+    radial-gradient(
+        rgba(168,85,247,.25),
+        transparent 70%
+    );
+
+    pointer-events:none;
+}
+
+/* Hover */
 
 .metric-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 10px 40px rgba(0,0,0,0.8);
-}
 
-/* ---------- TABS ---------- */
-button[data-baseweb="tab"] {
-    background: transparent !important;
-    color: #aaa !important;
-    font-weight: 600;
-}
+    transform:
+        translateY(-8px)
+        scale(1.02);
 
-button[data-baseweb="tab"][aria-selected="true"] {
-    color: #c471f5 !important;
-    border-bottom: 2px solid #c471f5 !important;
+    box-shadow:
+        0 20px 50px rgba(168,85,247,.35),
+        0 0 40px rgba(34,211,238,.15);
 }
-
-/* ---------- BUTTONS ---------- */
-.stButton>button {
-    background: linear-gradient(135deg, #00f5a0, #c471f5, #fa71cd);
-    color: black;
-    border-radius: 12px;
-    border: none;
-    padding: 10px 18px;
-    font-weight: bold;
-    transition: 0.3s;
-}
-
-.stButton>button:hover {
-    transform: scale(1.08);
-    box-shadow: 0 0 15px rgba(196,113,245,0.6);
-}
-
-/* ---------- FILE UPLOADER ---------- */
-[data-testid="stFileUploader"] {
-    background: rgba(255,255,255,0.06);
-    padding: 15px;
-    border-radius: 12px;
-    border: 1px dashed rgba(255,255,255,0.3);
-}
-
-/* ---------- DATAFRAME ---------- */
-[data-testid="stDataFrame"] {
-    border-radius: 12px;
-    overflow: hidden;
-}
-
-/* ---------- SCROLLBAR ---------- */
-::-webkit-scrollbar {
-    width: 8px;
-}
-::-webkit-scrollbar-thumb {
-    background: linear-gradient(#00f5a0, #c471f5);
-    border-radius: 10px;
-}
-
-/* ---------- EXTRA PREMIUM EFFECT ---------- */
-.metric-card, .stButton>button {
-    backdrop-filter: blur(10px);
-}
-
-/* ---------- GLOW TEXT EFFECT ---------- */
-h1::after {
-    content: "";
-    display: block;
-    height: 2px;
-    width: 120px;
-    margin: 10px auto;
-    background: linear-gradient(90deg,#00f5a0,#c471f5,#fa71cd);
-    border-radius: 10px;
-}
-/* ---------- TAB BACKGROUND ENHANCEMENT ---------- */
-div[data-baseweb="tab-list"] {
-    background: linear-gradient(135deg, rgba(95,44,130,0.4), rgba(196,113,245,0.3));
-    padding: 8px;
-    border-radius: 12px;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-}
-
-/* Individual Tabs */
-button[data-baseweb="tab"] {
-    border-radius: 10px !important;
-    margin: 2px;
-    transition: 0.3s;
-}
-
-/* Active Tab Glow */
-button[data-baseweb="tab"][aria-selected="true"] {
-    background: linear-gradient(135deg, #5f2c82, #c471f5) !important;
-    color: white !important;
-    box-shadow: 0 0 12px rgba(196,113,245,0.7);
-}
-
-/* Hover Effect */
-button[data-baseweb="tab"]:hover {
-    background: rgba(196,113,245,0.2) !important;
-    color: #fff !important;
-}
-/* ---------- GLOBAL GLASS CONTAINER STYLE ---------- */
-.block-container {
-    background: rgba(40, 20, 70, 0.55);
-    padding: 20px;
-    border-radius: 16px;
-    backdrop-filter: blur(14px);
-    box-shadow: 0 8px 40px rgba(0,0,0,0.6);
-}
-
-/* ---------- ALL SECTIONS (HEADERS / SUBHEADERS) ---------- */
-h2, h3 {
-    background: linear-gradient(90deg, rgba(95,44,130,0.25), rgba(196,113,245,0.25));
-    padding: 8px 12px;
-    border-radius: 10px;
-    backdrop-filter: blur(8px);
-}
-
-/* ---------- TABS CONTENT AREA ---------- */
-section.main > div {
-    background: rgba(40, 20, 70, 0.35);
-    border-radius: 16px;
-    padding: 15px;
-    backdrop-filter: blur(12px);
-}
-
-/* ---------- PLOTLY CHART CONTAINERS ---------- */
-[data-testid="stPlotlyChart"] {
-    background: rgba(255,255,255,0.05);
-    padding: 12px;
-    border-radius: 14px;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-}
-
-/* ---------- DATAFRAME TABLE ---------- */
-[data-testid="stDataFrame"] {
-    background: rgba(255,255,255,0.05);
-    padding: 10px;
-    border-radius: 12px;
-    backdrop-filter: blur(10px);
-}
-
-/* ---------- INPUTS (SLIDERS / SELECT / TEXT) ---------- */
-.stSlider, .stSelectbox, .stTextInput, .stMultiSelect {
-    background: rgba(255,255,255,0.05);
-    padding: 10px;
-    border-radius: 10px;
-    backdrop-filter: blur(8px);
-}
-
-/* ---------- KPI ROW ALIGNMENT ---------- */
-div[data-testid="column"] {
-    background: transparent;
-}
-
-/* ---------- SUCCESS / WARNING / ERROR BOXES ---------- */
-.stAlert {
-    border-radius: 12px;
-    backdrop-filter: blur(10px);
-}
-
-/* ---------- TAB PANELS SMOOTH LOOK ---------- */
-div[role="tabpanel"] {
-    background: rgba(40, 20, 70, 0.4);
-    padding: 20px;
-    border-radius: 16px;
-    backdrop-filter: blur(12px);
-}
-
-/* ---------- EXTRA GLOW EFFECT ---------- */
-.block-container, [data-testid="stPlotlyChart"], .metric-card {
-    box-shadow: 0 0 25px rgba(196,113,245,0.15);
-}
-
 </style>
-""", unsafe_allow_html=True)
+""", unsafe_allow_html=True) 
 
 st.title("🚀 Retail AI Intelligence Platform")
 
-# ---------------- FILE UPLOAD ----------------
-file = st.file_uploader("Upload your retail dataset (CSV)", type=["csv"])
+# ==========================================================
+# 📂 DATASET UPLOAD & INGESTION
+# ==========================================================
 
-if file is not None:
+# Upload retail dataset (CSV format only)
+uploaded_file = st.file_uploader(
+    "Upload your retail dataset (CSV)",
+    type=["csv"]
+)
+
+if uploaded_file is not None:
+
+    # ======================================================
+    # 📖 READ DATASET
+    # ======================================================
 
     try:
-        df = pd.read_csv(file, encoding="latin1")
-    except Exception as e:
-        st.error(f"Cannot read CSV: {e}")
-        st.stop() 
+        df = pd.read_csv(uploaded_file, encoding="latin1")
 
-    # ---------------- AUTO COLUMN DETECTION ----------------
-    def find_col(keywords):
-        for col in df.columns:
-            for k in keywords:
-                if k in col.lower():
-                    return col
-        return None
-
-    date_col = find_col(["date", "time"])
-    amount_col = find_col(["amount", "sales", "revenue", "price"])
-    category_col = find_col(["category", "product", "item"])
-    gender_col = find_col(["gender", "sex"])
-    transaction_col = find_col(["transaction", "order", "bill", "invoice"])
-    customer_col = find_col(["customer", "user", "client"])
-
-    if not date_col or not amount_col:
-        st.error("Dataset must contain Date and Sales column")
+    except Exception as error:
+        st.error(f"Unable to read CSV file: {error}")
         st.stop()
 
-    # ---------------- STANDARDIZE ----------------
-    df.rename(columns={
-        date_col: "Date",
-        amount_col: "Total Amount"
-    }, inplace=True)
+    # ======================================================
+    # 🔍 AUTOMATIC COLUMN DETECTION
+    # ======================================================
 
-    # ✅ FIX 1: remove duplicate columns (SAFE ADD)
+    def find_column(keywords):
+        """
+        Automatically identify dataset columns based on
+        common retail naming conventions.
+        """
+        for column in df.columns:
+            for keyword in keywords:
+                if keyword in column.lower():
+                    return column
+        return None
+
+    # Detect important columns
+    date_col = find_column(["date", "time"])
+    amount_col = find_column(["amount", "sales", "revenue", "price"])
+    category_col = find_column(["category", "product", "item"])
+    gender_col = find_column(["gender", "sex"])
+    transaction_col = find_column(["transaction", "order", "bill", "invoice"])
+    customer_col = find_column(["customer", "user", "client"])
+
+    # Validate required fields
+    if not date_col or not amount_col:
+        st.error("Dataset must contain both Date and Sales-related columns.")
+        st.stop()
+
+    # ======================================================
+    # 🧹 DATA STANDARDIZATION & CLEANING
+    # ======================================================
+
+    # Rename detected columns into standard names
+    df.rename(
+        columns={
+            date_col: "Date",
+            amount_col: "Total Amount"
+        },
+        inplace=True
+    )
+
+    # Remove duplicate column names if present
     df = df.loc[:, ~df.columns.duplicated()]
 
-    df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
+    # Convert date column to datetime format
+    df["Date"] = pd.to_datetime(
+        df["Date"],
+        errors="coerce"
+    )
 
-    # ✅ FIX 2: handle multi-column issue (SAFE ADD)
+    # Handle accidental duplicate sales columns
     if isinstance(df["Total Amount"], pd.DataFrame):
         df["Total Amount"] = df["Total Amount"].iloc[:, 0]
 
-    df["Total Amount"] = pd.to_numeric(df["Total Amount"], errors="coerce")
+    # Convert sales values into numeric format
+    df["Total Amount"] = pd.to_numeric(
+        df["Total Amount"],
+        errors="coerce"
+    )
 
+    # Remove invalid records
     df.dropna(inplace=True)
 
-    # Safe defaults
-    df["Product Category"] = df[category_col] if category_col else "General"
-    df["Gender"] = df[gender_col] if gender_col else "Unknown"
+    # ======================================================
+    # 🏷 CREATE STANDARD BUSINESS FIELDS
+    # ======================================================
 
+    # Product Category
+    df["Product Category"] = (
+        df[category_col]
+        if category_col
+        else "General"
+    )
+
+    # Customer Gender
+    df["Gender"] = (
+        df[gender_col]
+        if gender_col
+        else "Unknown"
+    )
+
+    # Transaction Identifier
     if transaction_col:
         df["Transaction ID"] = df[transaction_col]
     else:
         df["Transaction ID"] = range(len(df))
 
+    # Customer Identifier
     if customer_col:
         df["Customer ID"] = df[customer_col]
     else:
         df["Customer ID"] = 0
 
-    # ================= PREMIUM FILTERS =================
+    # ======================================================
+    # 🎛 SMART FILTER CONTROL PANEL
+    # ======================================================
+
     st.sidebar.title("🎛 Smart Control Panel")
 
-    search = st.sidebar.text_input("🔍 Search Category")
+    # ----------------------------------
+    # Category Search
+    # ----------------------------------
+    search_text = st.sidebar.text_input(
+        "🔍 Search Category"
+    )
+
     categories = df["Product Category"].unique()
 
-    if search:
-        categories = [c for c in categories if search.lower() in str(c).lower()]
+    if search_text:
+        categories = [
+            category
+            for category in categories
+            if search_text.lower() in str(category).lower()
+        ]
 
-    category = st.sidebar.multiselect("📦 Category", categories)
-    gender = st.sidebar.multiselect("👤 Gender", df["Gender"].unique())
+    # ----------------------------------
+    # Multi-Select Filters
+    # ----------------------------------
+    selected_categories = st.sidebar.multiselect(
+        "📦 Product Category",
+        categories
+    )
 
+    selected_gender = st.sidebar.multiselect(
+        "👤 Gender",
+        df["Gender"].unique()
+    )
+
+    # ----------------------------------
+    # Date Range Filter
+    # ----------------------------------
     date_range = st.sidebar.date_input(
         "📅 Date Range",
-        [df["Date"].min(), df["Date"].max()]
+        [
+            df["Date"].min(),
+            df["Date"].max()
+        ]
     )
+
+    # ======================================================
+    # ⚡ QUICK FILTERS
+    # ======================================================
 
     st.sidebar.markdown("### ⚡ Quick Filters")
 
+    # Last 7 Days Filter
     if st.sidebar.button("Last 7 Days"):
-        df = df[df["Date"] >= df["Date"].max() - pd.Timedelta(days=7)]
+        df = df[
+            df["Date"] >= (
+                df["Date"].max() -
+                pd.Timedelta(days=7)
+            )
+        ]
 
+    # Top Revenue Category Filter
     if st.sidebar.button("Top Category"):
-        top = df.groupby("Product Category")["Total Amount"].sum().idxmax()
-        df = df[df["Product Category"] == top]
+
+        top_category = (
+            df.groupby("Product Category")["Total Amount"]
+            .sum()
+            .idxmax()
+        )
+
+        df = df[
+            df["Product Category"] == top_category
+        ]
+
+    # ======================================================
+    # 🎯 APPLY USER FILTERS
+    # ======================================================
 
     filtered_df = df.copy()
 
-    if category:
-        filtered_df = filtered_df[filtered_df["Product Category"].isin(category)]
+    # Category Filter
+    if selected_categories:
+        filtered_df = filtered_df[
+            filtered_df["Product Category"].isin(
+                selected_categories
+            )
+        ]
 
-    if gender:
-        filtered_df = filtered_df[filtered_df["Gender"].isin(gender)]
+    # Gender Filter
+    if selected_gender:
+        filtered_df = filtered_df[
+            filtered_df["Gender"].isin(
+                selected_gender
+            )
+        ]
 
+    # Date Range Filter
     if len(date_range) == 2:
         filtered_df = filtered_df[
             (filtered_df["Date"] >= pd.to_datetime(date_range[0])) &
             (filtered_df["Date"] <= pd.to_datetime(date_range[1]))
         ]
 
-    # ---------------- KPIs ----------------
+    # ======================================================
+    # 📊 KEY PERFORMANCE INDICATORS (KPIs)
+    # ======================================================
+
     st.subheader("📊 Key Metrics")
 
-    revenue = filtered_df['Total Amount'].sum()
-    transactions = filtered_df['Transaction ID'].nunique()
-    avg_order = revenue / max(transactions, 1)
-    customers = filtered_df['Customer ID'].nunique()
+    total_revenue = filtered_df["Total Amount"].sum()
 
-    c1, c2, c3, c4 = st.columns(4)
-    c1.markdown(f"<div class='metric-card'>💰 Revenue<br>${revenue:,.0f}</div>", unsafe_allow_html=True)
-    c2.markdown(f"<div class='metric-card'>🛒 Transactions<br>{transactions}</div>", unsafe_allow_html=True)
-    c3.markdown(f"<div class='metric-card'>📦 Avg Order<br>${avg_order:.2f}</div>", unsafe_allow_html=True)
-    c4.markdown(f"<div class='metric-card'>👥 Customers<br>{customers}</div>", unsafe_allow_html=True)
+    total_transactions = (
+        filtered_df["Transaction ID"]
+        .nunique()
+    )
 
-    # ---------------- TABS ----------------
+    average_order_value = (
+        total_revenue /
+        max(total_transactions, 1)
+    )
+
+    total_customers = (
+        filtered_df["Customer ID"]
+        .nunique()
+    )
+
+    # KPI Cards Layout
+    kpi1, kpi2, kpi3, kpi4 = st.columns(4)
+
+    with kpi1:
+       st.markdown(
+        f"""
+        <div class="metric-card">
+            <div style="font-size:14px;color:#94a3b8;">💰 Total Revenue</div>
+            <div style="font-size:32px;font-weight:800;color:white;margin-top:10px;">
+                ${total_revenue:,.0f}
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    with kpi2:
+       st.markdown(
+        f"""
+        <div class="metric-card">
+            <div style="font-size:14px;color:#94a3b8;">🛒 Transactions</div>
+            <div style="font-size:32px;font-weight:800;color:white;margin-top:10px;">
+                {total_transactions:,}
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    with kpi3:
+       st.markdown(
+        f"""
+        <div class="metric-card">
+            <div style="font-size:14px;color:#94a3b8;">📦 Avg Order Value</div>
+            <div style="font-size:32px;font-weight:800;color:white;margin-top:10px;">
+                ${average_order_value:,.2f}
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    with kpi4:
+       st.markdown(
+        f"""
+        <div class="metric-card">
+            <div style="font-size:14px;color:#94a3b8;">👥 Customers</div>
+            <div style="font-size:32px;font-weight:800;color:white;margin-top:10px;">
+                {total_customers:,}
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+    
+    def generate_executive_insights(df, filtered_df):
+        
+        insights = []
+
+        total_revenue = filtered_df["Total Amount"].sum()
+
+        avg_daily = (
+        filtered_df.groupby("Date")["Total Amount"].sum().mean()
+        )
+
+        top_category = (
+        filtered_df.groupby("Product Category")["Total Amount"]
+        .sum()
+        .idxmax()
+        )
+
+        category_share = (
+        filtered_df.groupby("Product Category")["Total Amount"]
+        .sum()
+        .max()
+        / total_revenue
+        ) * 100
+
+        # ---------------- EXECUTIVE SUMMARY ----------------
+        insights.append(
+        f"📊 Revenue performance shows total sales of "
+        f"${total_revenue:,.0f} with an average daily run-rate of "
+        f"${avg_daily:,.0f}."
+    )
+
+    # ---------------- DRIVER INSIGHT ----------------
+        insights.append(
+        f"📦 Primary growth driver is '{top_category}', "
+        f"contributing {category_share:.1f}% of total revenue."
+    )
+
+    # ---------------- RISK ANALYSIS ----------------
+        volatility = filtered_df.groupby("Date")["Total Amount"].std().mean()
+
+        if volatility > filtered_df["Total Amount"].mean() * 0.5:
+          insights.append(
+            "⚠️ High revenue volatility detected — demand is unstable "
+            "and may require pricing or inventory stabilization."
+        )
+        else:
+          insights.append( 
+            "✅ Revenue pattern is stable with low volatility risk."
+        )
+
+    # ---------------- OPPORTUNITY ----------------
+        low_categories = (
+          filtered_df.groupby("Product Category")["Total Amount"]
+        .sum()
+        .sort_values()
+        .head(1)
+        .index[0]
+    )
+
+        insights.append(
+        f"💡 Upside opportunity identified in '{low_categories}' category "
+        "through targeted promotions or bundling strategies."
+    )
+
+    # ---------------- ACTION RECOMMENDATIONS ----------------
+        insights.append(
+        "🎯 Recommended Action: Focus marketing investment on top category, "
+        "optimize pricing strategy, and monitor weekly demand shifts."
+    )
+
+        return insights
+
+    # ==========================================================
+    # 📑 APPLICATION NAVIGATION TABS
+    # ==========================================================
+
     tabs = st.tabs([
         "📊 Dashboard",
         "📂 Dataset Overview",
         "📈 Forecast",
         "🤖 ML Models",
-        "⚖️ Comparison",
+        "⚖️ Model Comparison",
         "🔮 Predictor",
         "🚨 Anomaly Detection",
         "💡 Reinforcement Learning",
-        "💡 Deep Reinforcement Learning"
+        "🧠 Deep Reinforcement Learning"
     ])
 
-    # ---------------- DASHBOARD ----------------
+
+        # ======================================================
+    # 📊 DASHBOARD
+    # ======================================================
+
     with tabs[0]:
-        st.subheader("📊 Category Analysis")
 
-        col1, col2 = st.columns(2)
+        category_revenue = (
+            filtered_df
+            .groupby("Product Category")["Total Amount"]
+            .sum()
+            .sort_values(ascending=False)
+        )
 
-        cat_sales = filtered_df.groupby('Product Category')['Total Amount'].sum().sort_values(ascending=False)
+        top_category = (
+            category_revenue.idxmax()
+            if not category_revenue.empty
+            else "N/A"
+        )
 
-        col1.plotly_chart(px.bar(cat_sales, x=cat_sales.index, y=cat_sales.values,
-                                 title="Revenue by Category"), use_container_width=True)
+        # --------------------------------------------------
+        # CATEGORY PERFORMANCE
+        # --------------------------------------------------
 
-        col2.plotly_chart(px.pie(values=cat_sales.values, names=cat_sales.index,
-                                 hole=0.5, title="Category Share"), use_container_width=True)
+        st.subheader("📦 Product Category Performance")
 
-        st.subheader("📈 Sales Trend")
+        left_col, right_col = st.columns(2)
 
-        ts = filtered_df.groupby('Date')['Total Amount'].sum()
-        rolling = ts.rolling(7).mean()
+        with left_col:
 
-        fig = go.Figure()
-        fig.add_trace(go.Scatter(x=ts.index, y=ts.values, name="Daily"))
-        fig.add_trace(go.Scatter(x=rolling.index, y=rolling.values, name="7-Day Avg"))
-        st.plotly_chart(fig, use_container_width=True)
+            revenue_chart = px.bar(
+                category_revenue.reset_index(),
+                x="Product Category",
+                y="Total Amount",
+                text_auto=".2s",
+                title="Revenue by Category"
+            )
 
-    # ---------------- NEW DATASET OVERVIEW TAB ----------------
+            revenue_chart.update_layout(
+                template="plotly_dark",
+                height=450,
+                xaxis_title="Category",
+                yaxis_title="Revenue"
+            )
+
+            st.plotly_chart(
+                revenue_chart,
+                use_container_width=True
+            )
+
+        with right_col:
+
+            category_share_chart = px.pie(
+                values=category_revenue.values,
+                names=category_revenue.index,
+                hole=0.60,
+                title="Revenue Contribution"
+            )
+
+            category_share_chart.update_layout(
+                template="plotly_dark",
+                height=450
+            )
+
+            st.plotly_chart(
+                category_share_chart,
+                use_container_width=True
+            )
+
+        # --------------------------------------------------
+        # DAILY REVENUE TREND
+        # --------------------------------------------------
+
+        st.subheader("📈 Revenue Trend Analysis")
+
+        daily_revenue = (
+            filtered_df
+            .groupby("Date")["Total Amount"]
+            .sum()
+        )
+
+        moving_average_7d = (
+            daily_revenue
+            .rolling(window=7)
+            .mean()
+        )
+
+        moving_average_30d = (
+            daily_revenue
+            .rolling(window=30)
+            .mean()
+        )
+
+        trend_chart = go.Figure()
+
+        trend_chart.add_trace(
+            go.Scatter(
+                x=daily_revenue.index,
+                y=daily_revenue.values,
+                mode="lines",
+                name="Revenue"
+            )
+        )
+
+        trend_chart.add_trace(
+            go.Scatter(
+                x=moving_average_7d.index,
+                y=moving_average_7d.values,
+                mode="lines",
+                name="7-Day Avg"
+            )
+        )
+
+        trend_chart.add_trace(
+            go.Scatter(
+                x=moving_average_30d.index,
+                y=moving_average_30d.values,
+                mode="lines",
+                name="30-Day Avg"
+            )
+        )
+
+        trend_chart.update_layout(
+            template="plotly_dark",
+            height=550,
+            hovermode="x unified",
+            title="Revenue Trend Over Time"
+        )
+
+        st.plotly_chart(
+            trend_chart,
+            use_container_width=True
+        )
+
+        # --------------------------------------------------
+        # MONTHLY TREND ANALYSIS
+        # --------------------------------------------------
+
+        st.subheader("📅 Monthly Revenue Analysis")
+
+        monthly_revenue = (
+            filtered_df
+            .groupby(
+                pd.Grouper(
+                    key="Date",
+                    freq="M"
+                )
+            )["Total Amount"]
+            .sum()
+        )
+
+        monthly_chart = px.line(
+            monthly_revenue,
+            title="Monthly Revenue Trend",
+            markers=True
+        )
+
+        monthly_chart.update_layout(
+            template="plotly_dark",
+            height=500
+        )
+
+        st.plotly_chart(
+            monthly_chart,
+            use_container_width=True
+        )
+
+        # --------------------------------------------------
+        # CATEGORY PERFORMANCE TABLE
+        # --------------------------------------------------
+
+        st.subheader("📋 Category Performance Breakdown")
+
+        category_table = (
+            filtered_df
+            .groupby("Product Category")
+            .agg(
+                Revenue=("Total Amount", "sum"),
+                Orders=("Transaction ID", "count")
+            )
+            .sort_values(
+                "Revenue",
+                ascending=False
+            )
+        )
+
+        st.dataframe(
+            category_table,
+            use_container_width=True
+        )
+
+        # --------------------------------------------------
+        # EXECUTIVE INSIGHTS
+        # --------------------------------------------------
+
+        st.subheader("📌 Executive Insights")
+
+        if not category_revenue.empty:
+
+            top_category_sales = category_revenue.max()
+
+            contribution_pct = (
+                top_category_sales
+                /
+                category_revenue.sum()
+            ) * 100
+
+            best_day = daily_revenue.idxmax()
+
+            best_day_sales = daily_revenue.max()
+
+            st.markdown(
+                f"""
+                <div class="metric-card">
+
+                <h4>Business Performance Summary</h4>
+
+                <p>
+                Top Performing Category:
+                <b>{top_category}</b>
+                </p>
+
+                <p>
+                Category Contribution:
+                <b>{contribution_pct:.1f}%</b>
+                of total revenue
+                </p>
+
+                <p>
+                Highest Revenue Day:
+                <b>{best_day.date()}</b>
+                (${best_day_sales:,.0f})
+                </p>
+
+                <p>
+                Recommendation:
+                Focus inventory allocation,
+                marketing campaigns,
+                and promotional spending
+                on high-performing categories.
+                </p>
+
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+
+        # ======================================================
+    # 📂 DATA QUALITY & EXPLORATORY ANALYSIS
+    # ======================================================
+
     with tabs[1]:
-        st.subheader("📂 Dataset Overview & EDA")
 
-        st.write("### 📏 Shape")
-        st.write(f"Rows: {df.shape[0]}, Columns: {df.shape[1]}")
+        st.subheader("📂 Data Quality & Exploratory Analysis")
 
-        st.write("### 🔍 Data Types")
-        st.dataframe(df.dtypes)
+        # --------------------------------------------------
+        # DATASET HEALTH SUMMARY
+        # --------------------------------------------------
 
-        st.write("### ❗ Missing Values")
-        missing = df.isnull().sum()
-        st.dataframe(missing[missing > 0])
+        total_rows, total_columns = df.shape
 
-        st.write("### 📊 Statistical Summary")
-        st.dataframe(df.describe())
+        missing_cells = df.isnull().sum().sum()
 
-        st.write("### 🚨 Outlier Detection (IQR Method)")
-        numeric_cols = df.select_dtypes(include=np.number).columns
-        outlier_summary = {}
+        duplicate_rows = df.duplicated().sum()
 
-        for col in numeric_cols:
-            Q1 = df[col].quantile(0.25)
-            Q3 = df[col].quantile(0.75)
-            IQR = Q3 - Q1
-            lower = Q1 - 1.5 * IQR
-            upper = Q3 + 1.5 * IQR
-            outliers = df[(df[col] < lower) | (df[col] > upper)]
-            outlier_summary[col] = len(outliers)
+        numeric_columns = (
+            df.select_dtypes(include=np.number)
+            .columns
+        )
 
-        st.dataframe(pd.DataFrame(outlier_summary.items(), columns=["Column","Outliers Count"]))
+        kpi1, kpi2, kpi3, kpi4 = st.columns(4)
 
-        st.write("### 📈 Distributions")
-        for col in numeric_cols[:3]:
-            fig = px.histogram(df, x=col, title=f"{col} Distribution")
-            st.plotly_chart(fig, use_container_width=True)
+        with kpi1:
 
-    # ---------------- REST OF YOUR CODE (UNCHANGED) ----------------
-    with tabs[2]:
-        st.subheader("📈 30-Day Forecast")
-        ts = filtered_df.groupby('Date')['Total Amount'].sum().asfreq('D').fillna(0)
-        ts_smooth = ts.rolling(7).mean().bfill()
+            st.markdown(
+                f"""
+                <div class="metric-card">
+                    <h3>{total_rows:,}</h3>
+                    <p>Total Records</p>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
 
-        if len(ts_smooth) > 20:
-            model = ARIMA(ts_smooth, order=(2,1,2)).fit()
-            forecast = model.get_forecast(30)
-            pred = forecast.predicted_mean
-            conf = forecast.conf_int()
+        with kpi2:
+
+            st.markdown(
+                f"""
+                <div class="metric-card">
+                    <h3>{total_columns}</h3>
+                    <p>Total Features</p>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+        with kpi3:
+
+            st.markdown(
+                f"""
+                <div class="metric-card">
+                    <h3>{missing_cells:,}</h3>
+                    <p>Missing Values</p>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+        with kpi4:
+
+            st.markdown(
+                f"""
+                <div class="metric-card">
+                    <h3>{duplicate_rows:,}</h3>
+                    <p>Duplicate Records</p>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+        st.markdown("---")
+
+        # --------------------------------------------------
+        # DATA TYPES
+        # --------------------------------------------------
+
+        st.subheader("🔍 Data Structure")
+
+        dtype_df = pd.DataFrame({
+            "Column Name": df.columns,
+            "Data Type": df.dtypes.astype(str).values
+        })
+
+        st.dataframe(
+            dtype_df,
+            use_container_width=True
+        )
+
+        # --------------------------------------------------
+        # MISSING VALUE ANALYSIS
+        # --------------------------------------------------
+
+        st.subheader("❗ Missing Value Assessment")
+
+        missing_values = (
+            df.isnull()
+            .sum()
+            .sort_values(ascending=False)
+        )
+
+        missing_values = (
+            missing_values[missing_values > 0]
+        )
+
+        if not missing_values.empty:
+
+            missing_chart = px.bar(
+                x=missing_values.index,
+                y=missing_values.values,
+                title="Missing Values by Feature"
+            )
+
+            missing_chart.update_layout(
+                template="plotly_dark",
+                height=450
+            )
+
+            st.plotly_chart(
+                missing_chart,
+                use_container_width=True
+            )
+
         else:
-            pred = pd.Series([ts_smooth.mean()] * 30)
-            conf = pd.DataFrame()
 
-        fig = go.Figure()
-        fig.add_trace(go.Scatter(x=ts_smooth.index, y=ts_smooth.values, name="Actual"))
-        fig.add_trace(go.Scatter(x=pred.index, y=pred.values, name="Forecast"))
-        st.plotly_chart(fig, use_container_width=True)
+            st.success(
+                "✅ Dataset contains no missing values."
+            )
+
+        # --------------------------------------------------
+        # DESCRIPTIVE STATISTICS
+        # --------------------------------------------------
+
+        st.subheader("📊 Statistical Profile")
+
+        st.dataframe(
+            df.describe().round(2),
+            use_container_width=True
+        )
+
+        # --------------------------------------------------
+        # OUTLIER ANALYSIS
+        # --------------------------------------------------
+
+        st.subheader("🚨 Outlier Assessment")
+
+        outlier_results = []
+
+        for column in numeric_columns:
+
+            q1 = df[column].quantile(0.25)
+
+            q3 = df[column].quantile(0.75)
+
+            iqr = q3 - q1
+
+            lower_bound = (
+                q1 - (1.5 * iqr)
+            )
+
+            upper_bound = (
+                q3 + (1.5 * iqr)
+            )
+
+            outlier_count = len(
+                df[
+                    (df[column] < lower_bound)
+                    |
+                    (df[column] > upper_bound)
+                ]
+            )
+
+            outlier_results.append({
+                "Feature": column,
+                "Outliers": outlier_count
+            })
+
+        outlier_df = pd.DataFrame(
+            outlier_results
+        )
+
+        outlier_chart = px.bar(
+            outlier_df,
+            x="Feature",
+            y="Outliers",
+            title="Outlier Distribution"
+        )
+
+        outlier_chart.update_layout(
+            template="plotly_dark",
+            height=450
+        )
+
+        st.plotly_chart(
+            outlier_chart,
+            use_container_width=True
+        )
+
+        st.dataframe(
+            outlier_df,
+            use_container_width=True
+        )
+
+        # --------------------------------------------------
+        # FEATURE DISTRIBUTIONS
+        # --------------------------------------------------
+
+        st.subheader("📈 Feature Distribution Analysis")
+
+        selected_feature = st.selectbox(
+            "Select Numerical Feature",
+            numeric_columns
+        )
+
+        distribution_chart = px.histogram(
+            df,
+            x=selected_feature,
+            nbins=40,
+            marginal="box",
+            title=f"{selected_feature} Distribution"
+        )
+
+        distribution_chart.update_layout(
+            template="plotly_dark",
+            height=500
+        )
+
+        st.plotly_chart(
+            distribution_chart,
+            use_container_width=True
+        )
+
+        # --------------------------------------------------
+        # CORRELATION ANALYSIS
+        # --------------------------------------------------
+
+        st.subheader("🔗 Correlation Analysis")
+
+        if len(numeric_columns) > 1:
+
+            correlation_matrix = (
+                df[numeric_columns]
+                .corr()
+            )
+
+            correlation_chart = px.imshow(
+                correlation_matrix,
+                text_auto=".2f",
+                aspect="auto",
+                title="Feature Correlation Matrix"
+            )
+
+            correlation_chart.update_layout(
+                template="plotly_dark",
+                height=650
+            )
+
+            st.plotly_chart(
+                correlation_chart,
+                use_container_width=True
+            )
+
+        # ======================================================
+    # 📈 SALES FORECASTING TAB
+    # ======================================================
+
+    with tabs[2]:
+
+        st.subheader("📈 Sales Forecasting")
+
+        # --------------------------------------------------
+        # Prepare Daily Time Series Data
+        # --------------------------------------------------
+
+        daily_sales_series = (
+            filtered_df
+            .groupby("Date")["Total Amount"]
+            .sum()
+            .asfreq("D")
+            .fillna(0)
+        )
+
+        smoothed_sales = (
+            daily_sales_series
+            .rolling(window=7)
+            .mean()
+            .bfill()
+        )
+
+        # --------------------------------------------------
+        # Forecast Generation
+        # --------------------------------------------------
+
+        if len(smoothed_sales) == 0:
+
+            st.warning(
+                "No data available for forecasting."
+            )
+
+            forecast_values = pd.Series(dtype=float)
+
+            confidence_interval = pd.DataFrame()
+
+        elif len(smoothed_sales) > 20:
+
+            forecast_model = ARIMA(
+                smoothed_sales,
+                order=(2, 1, 2)
+            ).fit()
+
+            forecast_result = (
+                forecast_model
+                .get_forecast(steps=30)
+            )
+
+            forecast_values = (
+                forecast_result
+                .predicted_mean
+            )
+
+            confidence_interval = (
+                forecast_result
+                .conf_int()
+            )
+
+        else:
+
+            forecast_values = pd.Series(
+                [smoothed_sales.mean()] * 30,
+                index=pd.date_range(
+                    start=smoothed_sales.index.max()
+                    + pd.Timedelta(days=1),
+                    periods=30,
+                    freq="D"
+                )
+            )
+
+            confidence_interval = pd.DataFrame()
+
+        # --------------------------------------------------
+        # KPI ROW
+        # --------------------------------------------------
+
+        col1, col2, col3 = st.columns(3)
+
+        forecast_revenue = float(forecast_values.sum())
+        avg_forecast = float(forecast_values.mean())
+
+        recent_mean = float(smoothed_sales.tail(30).mean()) if len(smoothed_sales) > 0 else 1
+        forecast_mean = float(forecast_values.mean())
+
+        trend = ((forecast_mean - recent_mean) / max(recent_mean, 1)) * 100
+
+
+        with col1:
+            st.markdown(
+        "<div class='metric-card'>"
+        "<h4>📊 Forecast Revenue</h4>"
+        f"<h2>${forecast_revenue:,.1f}</h2>"
+        "</div>",
+        unsafe_allow_html=True
+    )
+
+        with col2:
+             st.markdown(
+        "<div class='metric-card'>"
+        "<h4>📈 Daily Forecast</h4>"
+        f"<h2>${avg_forecast:,.1f}</h2>"
+        "</div>",
+        unsafe_allow_html=True
+    )
+
+        with col3:
+             st.markdown(
+        "<div class='metric-card'>"
+        "<h4>🚀 Growth Trend</h4>"
+        f"<h2>{trend:.1f}%</h2>"
+        "</div>",
+        unsafe_allow_html=True
+    )
+
+        # --------------------------------------------------
+        # Forecast Chart
+        # --------------------------------------------------
+
+        forecast_chart = go.Figure()
+
+        forecast_chart.add_trace(
+            go.Scatter(
+                x=smoothed_sales.index,
+                y=smoothed_sales.values,
+                mode="lines",
+                name="Historical",
+                line=dict(width=4)
+            )
+        )
+
+        forecast_chart.add_trace(
+            go.Scatter(
+                x=forecast_values.index,
+                y=forecast_values.values,
+                mode="lines",
+                name="Forecast",
+                line=dict(
+                    width=4,
+                    dash="dash"
+                )
+            )
+        )
+
+        if not confidence_interval.empty:
+
+            forecast_chart.add_trace(
+                go.Scatter(
+                    x=list(forecast_values.index)
+                    + list(forecast_values.index[::-1]),
+
+                    y=list(confidence_interval.iloc[:, 0])
+                    + list(confidence_interval.iloc[:, 1][::-1]),
+
+                    fill="toself",
+
+                    line=dict(width=0),
+
+                    hoverinfo="skip",
+
+                    showlegend=False
+                )
+            )
+
+        forecast_chart.update_layout(
+            template="plotly_dark",
+            height=600,
+            hovermode="x unified",
+            margin=dict(
+                l=20,
+                r=20,
+                t=30,
+                b=20
+            ),
+            legend=dict(
+                orientation="h",
+                y=1.05
+            )
+        )
+
+        st.plotly_chart(
+            forecast_chart,
+            use_container_width=True
+        )
+
+        # --------------------------------------------------
+        # Forecast Data
+        # --------------------------------------------------
+
+        forecast_df = pd.DataFrame({
+            "Date": forecast_values.index,
+            "Forecast Sales": forecast_values.values.round(2)
+        })
+
+        st.dataframe(
+            forecast_df,
+            use_container_width=True,
+            hide_index=True
+        )
+
+    # ======================================================
+    # 🤖 MACHINE LEARNING PERFORMANCE CENTER
+    # ======================================================
 
     with tabs[3]:
-        st.subheader("🤖 Model Training")
-        df_ml = filtered_df.copy()
-        df_ml['day'] = df_ml['Date'].dt.day
-        df_ml['month'] = df_ml['Date'].dt.month
 
-        df_ml = df_ml.drop(['Transaction ID', 'Date'], axis=1, errors='ignore')
-        df_ml = pd.get_dummies(df_ml, drop_first=True).fillna(0)
+        st.subheader("🤖 Machine Learning Performance Center")
 
-        X = df_ml.drop('Total Amount', axis=1)
-        y = df_ml['Total Amount']
+        # --------------------------------------------------
+        # FEATURE ENGINEERING
+        # --------------------------------------------------
 
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+        ml_df = filtered_df.copy()
+
+        ml_df["Day"] = ml_df["Date"].dt.day
+
+        ml_df["Month"] = ml_df["Date"].dt.month
+
+        ml_df = ml_df.drop(
+            ["Transaction ID", "Date"],
+            axis=1,
+            errors="ignore"
+        )
+
+        ml_df = (
+            pd.get_dummies(
+                ml_df,
+                drop_first=True
+            )
+            .fillna(0)
+        )
+
+        # --------------------------------------------------
+        # VALIDATION
+        # --------------------------------------------------
+
+        if len(ml_df) < 20:
+
+            st.warning(
+                "Insufficient data available for model training."
+            )
+
+            st.stop()
+
+        # --------------------------------------------------
+        # FEATURES & TARGET
+        # --------------------------------------------------
+
+        X = ml_df.drop(
+            "Total Amount",
+            axis=1
+        )
+
+        y = ml_df["Total Amount"]
+
+        X_train, X_test, y_train, y_test = train_test_split(
+            X,
+            y,
+            test_size=0.20,
+            random_state=42
+        )
+
+        # --------------------------------------------------
+        # MODELS
+        # --------------------------------------------------
 
         models = {
-            "Random Forest": RandomForestRegressor(),
-            "XGBoost": xgb.XGBRegressor(objective='reg:squarederror'),
-            "SVM": SVR()
+
+            "Random Forest": RandomForestRegressor(
+                n_estimators=200,
+                random_state=42
+            ),
+
+            "XGBoost": xgb.XGBRegressor(
+                objective="reg:squarederror",
+                n_estimators=200,
+                random_state=42
+            ),
+
+            "Support Vector Regression": SVR()
         }
 
-        results = {}
+        model_results = {}
 
-        for name, model in models.items():
-            model.fit(X_train, y_train)
-            pred = model.predict(X_test)
+        trained_models = {}
 
-            results[name] = {
-                "MAE": mean_absolute_error(y_test, pred),
-                "RMSE": np.sqrt(mean_squared_error(y_test, pred)),
-                "R2": r2_score(y_test, pred)
-            }
+        # --------------------------------------------------
+        # TRAINING
+        # --------------------------------------------------
 
-        res_df = pd.DataFrame(results).T.reset_index().rename(columns={'index':'Model'})
-        st.dataframe(res_df)
+        with st.spinner(
+            "Training machine learning models..."
+        ):
 
-        best_model_name = res_df.loc[res_df['R2'].idxmax(),'Model']
-        st.success(f"Best Model: {best_model_name}")
+            for model_name, model in models.items():
 
-        st.session_state["model"] = models[best_model_name]
-        st.session_state["columns"] = X.columns
-        
-                # ---------------- AI INSIGHTS ----------------
-        st.subheader("🧠 AI Insights")
+                model.fit(
+                    X_train,
+                    y_train
+                )
 
-        best_model = models[best_model_name]
+                y_pred = model.predict(
+                    X_test
+                )
+
+                trained_models[model_name] = model
+
+                model_results[model_name] = {
+
+                    "MAE":
+                    mean_absolute_error(
+                        y_test,
+                        y_pred
+                    ),
+
+                    "RMSE":
+                    np.sqrt(
+                        mean_squared_error(
+                            y_test,
+                            y_pred
+                        )
+                    ),
+
+                    "R² Score":
+                    r2_score(
+                        y_test,
+                        y_pred
+                    )
+                }
+
+        # --------------------------------------------------
+        # PERFORMANCE SUMMARY
+        # --------------------------------------------------
+
+        st.subheader(
+            "📊 Model Performance Comparison"
+        )
+
+        results_df = (
+            pd.DataFrame(model_results)
+            .T
+            .reset_index()
+            .rename(
+                columns={
+                    "index": "Model"
+                }
+            )
+        )
+
+        st.dataframe(
+            results_df.round(4),
+            use_container_width=True
+        )
+
+        # --------------------------------------------------
+        # MODEL COMPARISON CHART
+        # --------------------------------------------------
+
+        performance_chart = px.bar(
+            results_df,
+            x="Model",
+            y="R² Score",
+            text_auto=".3f",
+            title="Model Accuracy Comparison"
+        )
+
+        performance_chart.update_layout(
+            template="plotly_dark",
+            height=500
+        )
+
+        st.plotly_chart(
+            performance_chart,
+            use_container_width=True
+        )
+
+        # --------------------------------------------------
+        # BEST MODEL
+        # --------------------------------------------------
+
+        best_model_name = results_df.loc[
+            results_df["R² Score"].idxmax(),
+            "Model"
+        ]
+
+        best_model = trained_models[
+            best_model_name
+        ]
+
+        st.markdown(
+            f"""
+            <div class="metric-card">
+
+            <h3>🏆 Best Performing Model</h3>
+
+            <h2>{best_model_name}</h2>
+
+            <p>
+            Highest predictive performance
+            based on R² evaluation metric.
+            </p>
+
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        st.session_state["model"] = (
+            best_model
+        )
+
+        st.session_state["columns"] = (
+            X.columns
+        )
+
+        # --------------------------------------------------
+        # ACTUAL VS PREDICTED
+        # --------------------------------------------------
+
+        st.subheader(
+            "📈 Actual vs Predicted Performance"
+        )
+
+        y_pred_best = best_model.predict(
+            X_test
+        )
+
+        actual_vs_pred = go.Figure()
+
+        actual_vs_pred.add_trace(
+            go.Scatter(
+                x=y_test,
+                y=y_pred_best,
+                mode="markers",
+                name="Predictions"
+            )
+        )
+
+        actual_vs_pred.update_layout(
+            template="plotly_dark",
+            height=550,
+            xaxis_title="Actual Sales",
+            yaxis_title="Predicted Sales"
+        )
+
+        st.plotly_chart(
+            actual_vs_pred,
+            use_container_width=True
+        )
+
+        # --------------------------------------------------
+        # FEATURE IMPORTANCE
+        # --------------------------------------------------
+
+        st.subheader(
+            "🧠 Feature Importance Analysis"
+        )
 
         try:
-            if hasattr(best_model, "feature_importances_"):
-                importance = pd.Series(best_model.feature_importances_, index=X.columns)
-                importance = importance.sort_values(ascending=False)[:10]
 
-                fig = px.bar(importance, x=importance.values, y=importance.index,
-                             orientation='h', title="Top Feature Importance")
-                st.plotly_chart(fig, use_container_width=True)
+            if hasattr(
+                best_model,
+                "feature_importances_"
+            ):
 
-                st.success("Top factors influencing sales identified!")
+                feature_importance = pd.Series(
+                    best_model.feature_importances_,
+                    index=X.columns
+                )
+
+                feature_importance = (
+                    feature_importance
+                    .sort_values(
+                        ascending=False
+                    )
+                    .head(15)
+                )
+
+                importance_chart = px.bar(
+                    x=feature_importance.values,
+                    y=feature_importance.index,
+                    orientation="h",
+                    title="Top Drivers of Sales"
+                )
+
+                importance_chart.update_layout(
+                    template="plotly_dark",
+                    height=600
+                )
+
+                st.plotly_chart(
+                    importance_chart,
+                    use_container_width=True
+                )
+
             else:
-                st.info("Feature importance not available for this model.")
-        except:
-            st.warning("Could not compute feature importance.")
+
+                st.info(
+                    "Feature importance is not available for this model."
+                )
+
+        except Exception:
+
+            st.warning(
+                "Unable to generate feature importance."
+            )
+
+        # --------------------------------------------------
+        # BUSINESS INSIGHTS
+        # --------------------------------------------------
+
+        st.subheader(
+            "📌 Business Insights"
+        )
+
+        st.markdown(
+            f"""
+            <div class="metric-card">
+
+            <h4>AI Model Findings</h4>
+
+            <p>
+            ✔ Best Model:
+            <b>{best_model_name}</b>
+            </p>
+
+            <p>
+            ✔ Strongest predictors were identified
+            through feature importance analysis.
+            </p>
+
+            <p>
+            ✔ Predictive analytics can support
+            demand forecasting, inventory planning,
+            and revenue optimization.
+            </p>
+
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    # ======================================================
+    # ⚖️ MODEL COMPARISON
+    # ======================================================
 
     with tabs[4]:
-        st.subheader("⚖️ Model Comparison")
-        fig = px.bar(res_df, x='Model', y=['MAE','RMSE','R2'], barmode='group')
-        st.plotly_chart(fig, use_container_width=True)
-                # ---------------- BEST MODEL BADGE ----------------
-        st.subheader("🏆 Model Winner")
-        st.success(f"🏆 {best_model_name} performs best based on R² score!")
 
-        # ---------------- RADAR CHART ----------------
-        st.subheader("📡 Model Performance Radar")
+        st.subheader("⚖️ Model Comparison Dashboard")
 
-        try:
-            radar_df = res_df.set_index("Model")
-            fig = go.Figure()
+        # --------------------------------------------------
+        # MODEL SUMMARY
+        # --------------------------------------------------
 
-            for model in radar_df.index:
-                fig.add_trace(go.Scatterpolar(
-                    r=radar_df.loc[model].values,
-                    theta=radar_df.columns,
-                    fill='toself',
-                    name=model
-                ))
+        best_model_name = results_df.loc[
+            results_df["R² Score"].idxmax(),
+            "Model"
+        ]
 
-            fig.update_layout(polar=dict(radialaxis=dict(visible=True)))
-            st.plotly_chart(fig, use_container_width=True)
-        except:
-            st.warning("Radar chart not available.")
+        best_r2 = results_df["R² Score"].max()
+
+        lowest_rmse = results_df["RMSE"].min()
+
+        k1, k2, k3 = st.columns(3)
+
+        with k1:
+
+            st.metric(
+                "🏆 Best Model",
+                best_model_name
+            )
+
+        with k2:
+
+            st.metric(
+                "📈 Best R²",
+                f"{best_r2:.3f}"
+            )
+
+        with k3:
+
+            st.metric(
+                "🎯 Lowest RMSE",
+                f"{lowest_rmse:.2f}"
+            )
+
+        st.markdown("---")
+
+        # --------------------------------------------------
+        # PERFORMANCE COMPARISON
+        # --------------------------------------------------
+
+        comparison_chart = go.Figure()
+
+        comparison_chart.add_trace(
+            go.Bar(
+                name="MAE",
+                x=results_df["Model"],
+                y=results_df["MAE"]
+            )
+        )
+
+        comparison_chart.add_trace(
+            go.Bar(
+                name="RMSE",
+                x=results_df["Model"],
+                y=results_df["RMSE"]
+            )
+        )
+
+        comparison_chart.add_trace(
+            go.Bar(
+                name="R² Score",
+                x=results_df["Model"],
+                y=results_df["R² Score"]
+            )
+        )
+
+        comparison_chart.update_layout(
+            title="Model Performance Benchmark",
+            template="plotly_dark",
+            barmode="group",
+            height=550,
+            hovermode="x unified",
+            xaxis_title="Machine Learning Models",
+            yaxis_title="Performance Score",
+            legend_title="Metrics"
+        )
+
+        st.plotly_chart(
+            comparison_chart,
+            use_container_width=True
+        )
+
+        # --------------------------------------------------
+        # MODEL PERFORMANCE RADAR
+        # --------------------------------------------------
+
+        st.subheader("🎯 Model Performance Radar")
+
+        radar_df = results_df.copy()
+
+        radar_df["MAE Score"] = (
+            radar_df["MAE"].max()
+            - radar_df["MAE"]
+        )
+
+        radar_df["RMSE Score"] = (
+            radar_df["RMSE"].max()
+            - radar_df["RMSE"]
+        )
+
+        radar_chart = go.Figure()
+
+        for _, row in radar_df.iterrows():
+
+            radar_chart.add_trace(
+                go.Scatterpolar(
+                    r=[
+                        row["R² Score"],
+                        row["MAE Score"],
+                        row["RMSE Score"]
+                    ],
+                    theta=[
+                        "R² Score",
+                        "MAE Score",
+                        "RMSE Score"
+                    ],
+                    fill="toself",
+                    name=row["Model"]
+                )
+            )
+
+        radar_chart.update_layout(
+            template="plotly_dark",
+            height=650,
+            title="Multi-Metric Model Evaluation",
+            showlegend=True,
+            polar=dict(
+                radialaxis=dict(
+                    visible=True
+                )
+            )
+        )
+
+        st.plotly_chart(
+            radar_chart,
+            use_container_width=True
+        )
+
+        # --------------------------------------------------
+        # KEY FINDINGS
+        # --------------------------------------------------
+
+        st.markdown(
+            f"""
+            <div class="metric-card">
+
+            <h3>📌 Key Findings</h3>
+
+            <p>
+            🏆 <b>{best_model_name}</b> delivered the
+            strongest predictive performance across
+            the evaluated machine learning models.
+            </p>
+
+            <p>
+            📈 The model achieved the highest R² score,
+            indicating better ability to explain sales
+            variability in the dataset.
+            </p>
+
+            <p>
+            🎯 Lower prediction errors support more
+            accurate demand forecasting, inventory
+            planning, and revenue optimization.
+            </p>
+
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    # ======================================================
+    # 🔮 SALES PREDICTION TAB
+    # ======================================================
 
     with tabs[5]:
+
         st.subheader("🔮 Sales Predictor")
-        day = st.slider("Day", 1, 31, 15)
-        month = st.slider("Month", 1, 12, 6)
 
-        if st.button("Predict"):
-            sample = pd.DataFrame([[day, month]], columns=["day","month"])
+        # --------------------------------------------------
+        # User Input Controls
+        # --------------------------------------------------
 
-            for col in st.session_state["columns"]:
-                if col not in sample:
-                    sample[col] = 0
+        selected_day = st.slider(
+            "Day",
+            min_value=1,
+            max_value=31,
+            value=15
+        )
 
-            sample = sample[st.session_state["columns"]]
-            pred = st.session_state["model"].predict(sample)[0]
-            st.success(f"Predicted Sales: ${pred:.2f}")
-                    # ---------------- WHAT-IF ANALYSIS ----------------
+        selected_month = st.slider(
+            "Month",
+            min_value=1,
+            max_value=12,
+            value=6
+        )
+
+        # --------------------------------------------------
+        # Sales Prediction
+        # --------------------------------------------------
+
+        if st.button("Predict Sales"):
+
+            prediction_sample = pd.DataFrame(
+                [[selected_day, selected_month]],
+                columns=["day", "month"]
+            )
+
+            # Align input features with training data
+            for column in st.session_state["columns"]:
+
+                if column not in prediction_sample.columns:
+                    prediction_sample[column] = 0
+
+            prediction_sample = prediction_sample[
+                st.session_state["columns"]
+            ]
+
+            predicted_sales = (
+                st.session_state["model"]
+                .predict(prediction_sample)[0]
+            )
+
+            st.success(
+                f"💰 Predicted Sales: ${predicted_sales:.2f}"
+            )
+
+        # --------------------------------------------------
+        # What-If Scenario Analysis
+        # --------------------------------------------------
+
         st.subheader("🔍 What-If Analysis")
 
         if st.checkbox("Run Scenario Simulation"):
-            scenarios = []
-            for d in range(1, 8):
-                temp = pd.DataFrame([[d, month]], columns=["day", "month"])
-                for col in st.session_state["columns"]:
-                    if col not in temp:
-                        temp[col] = 0
-                temp = temp[st.session_state["columns"]]
 
-                val = st.session_state["model"].predict(temp)[0]
-                scenarios.append(val)
+            scenario_predictions = []
 
-            fig = px.line(x=list(range(1,8)), y=scenarios,
-                          title="Next 7 Days Prediction Trend")
-            st.plotly_chart(fig, use_container_width=True)
+            for future_day in range(1, 8):
 
-    with tabs[6]:
-        st.subheader("🚨 Theft Detection")
+                scenario_sample = pd.DataFrame(
+                    [[future_day, selected_month]],
+                    columns=["day", "month"]
+                )
 
-        ts = filtered_df.groupby('Date')['Total Amount'].sum()
-        z = (ts - ts.mean()) / ts.std()
-        anomalies = ts[abs(z) > 2]
+                for column in st.session_state["columns"]:
 
-        st.dataframe(anomalies)
+                    if column not in scenario_sample.columns:
+                        scenario_sample[column] = 0
 
-        fig = go.Figure()
-        fig.add_trace(go.Scatter(x=ts.index, y=ts.values, name="Sales"))
-        fig.add_trace(go.Scatter(x=anomalies.index, y=anomalies.values,
-                                 mode='markers', name="Anomaly"))
-        st.plotly_chart(fig, use_container_width=True)
-                # ---------------- ANOMALY SEVERITY ----------------
-        st.subheader("⚠️ Anomaly Severity")
+                scenario_sample = scenario_sample[
+                    st.session_state["columns"]
+                ]
 
-        if not anomalies.empty:
-            severity = (abs(z[anomalies.index]) * 10).round(2)
-            alert_df = pd.DataFrame({
-                "Date": anomalies.index,
-                "Sales": anomalies.values,
-                "Severity Score": severity.values
-            })
+                forecast_value = (
+                    st.session_state["model"]
+                    .predict(scenario_sample)[0]
+                )
 
-            st.dataframe(alert_df)
+                scenario_predictions.append(
+                    forecast_value
+                )
 
-            high_risk = alert_df[alert_df["Severity Score"] > 20]
-
-            if not high_risk.empty:
-                st.error("🚨 High Risk Theft Detected!")
-            else:
-                st.warning("⚠️ Moderate anomalies detected.")
-        else:
-            st.success("✅ No anomalies detected!")
-
-        # ---------------- HEATMAP VIEW ----------------
-        st.subheader("🔥 Sales Heatmap")
-
-        heatmap_data = filtered_df.copy()
-        heatmap_data["day"] = heatmap_data["Date"].dt.day
-        heatmap_data["month"] = heatmap_data["Date"].dt.month
-
-        pivot = heatmap_data.pivot_table(values="Total Amount",
-                                         index="day",
-                                         columns="month",
-                                         aggfunc="sum")
-
-        fig = px.imshow(pivot, title="Sales Heatmap")
-        st.plotly_chart(fig, use_container_width=True)
-    with tabs[7]:
-        st.subheader("💡 Reinforcement Learning: Dynamic Pricing")
-
-        st.markdown("### 🎯 Goal: Maximize Revenue using Smart Pricing")
-
-        # ---------------- PREPARE DATA ----------------
-        rl_df = filtered_df.copy()
-
-        daily_sales = rl_df.groupby("Date")["Total Amount"].sum()
-        demand_levels = pd.qcut(daily_sales, q=3, labels=["Low", "Medium", "High"])
-
-        states = demand_levels.values
-
-        actions = ["Decrease Price", "Keep Same", "Increase Price"]
-
-    # Encode states
-        state_map = {"Low":0, "Medium":1, "High":2}
-        n_states = 3
-        n_actions = 3
-
-        # ---------------- Q-TABLE ----------------
-        Q = np.zeros((n_states, n_actions))
-
-        alpha = 0.1   # learning rate
-        gamma = 0.9   # discount
-        epsilon = 0.2 # exploration
-
-    # ---------------- TRAINING ----------------
-        episodes = 200
-
-        for _ in range(episodes):
-          for i in range(len(states)-1):
-
-            state = state_map[states[i]]
-
-            # epsilon-greedy
-            if np.random.rand() < epsilon:
-                action = np.random.randint(n_actions)
-            else:
-                action = np.argmax(Q[state])
-
-            # Simulated reward
-            price_factor = [0.9, 1.0, 1.1][action]
-            reward = daily_sales.iloc[i] * price_factor
-
-            next_state = state_map[states[i+1]]
-
-            # Q update
-            Q[state, action] += alpha * (
-                reward + gamma * np.max(Q[next_state]) - Q[state, action]
+            scenario_chart = px.line(
+                x=list(range(1, 8)),
+                y=scenario_predictions,
+                title="Next 7 Days Predicted Sales Trend",
+                labels={
+                    "x": "Day",
+                    "y": "Predicted Sales"
+                }
             )
 
-    # ---------------- RESULTS ----------------
-        st.write("### 📊 Learned Pricing Strategy (Q-Table)")
-        q_df = pd.DataFrame(Q, index=["Low","Medium","High"], columns=actions)
-        st.dataframe(q_df)
+            st.plotly_chart(
+                scenario_chart,
+                use_container_width=True
+            )
 
-    # ---------------- BEST ACTION ----------------
-        st.write("### 🧠 Optimal Strategy")
+        # ======================================================
+    # 🚨 RISK & ANOMALY MONITORING
+    # ======================================================
 
-        best_actions = q_df.idxmax(axis=1)
-        for state, action in best_actions.items():
-          st.success(f"For {state} demand → {action}")
+    with tabs[6]:
 
-    # ---------------- VISUALIZATION ----------------
-        fig = px.imshow(Q,
-                    x=actions,
-                    y=["Low","Medium","High"],
-                    title="Q-Table Heatmap")
+        st.subheader("🚨 Risk & Anomaly Monitoring")
 
-        st.plotly_chart(fig, use_container_width=True)
+        # --------------------------------------------------
+        # DAILY SALES ANALYSIS
+        # --------------------------------------------------
 
-        st.info("💡 RL Agent learns how to adjust pricing dynamically to maximize revenue.")
-        
-    with tabs[8]:
-        st.subheader("🧠 Deep Reinforcement Learning (DQN for Dynamic Pricing)")
-        
-        import os
-        os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
-        import torch
-        import torch.nn as nn
-        import torch.optim as optim
-        import random
-        from collections import deque
+        daily_sales = (
+            filtered_df
+            .groupby("Date")["Total Amount"]
+            .sum()
+        )
 
-    # ---------------- DATA PREP ----------------
+        if len(daily_sales) < 2:
+
+            st.warning(
+                "Insufficient data available for anomaly detection."
+            )
+
+        else:
+
+            z_scores = (
+                daily_sales - daily_sales.mean()
+            ) / daily_sales.std()
+
+            anomalies = daily_sales[
+                abs(z_scores) > 2
+            ]
+
+            # --------------------------------------------------
+            # RISK SUMMARY KPIs
+            # --------------------------------------------------
+
+            total_days = len(daily_sales)
+
+            anomaly_count = len(anomalies)
+
+            risk_rate = (
+                anomaly_count / total_days * 100
+            )
+
+            highest_sale = daily_sales.max()
+
+            k1, k2, k3 = st.columns(3)
+
+            with k1:
+
+                st.metric(
+                    "🚨 Anomalies",
+                    anomaly_count
+                )
+
+            with k2:
+
+                st.metric(
+                    "📊 Risk Rate",
+                    f"{risk_rate:.1f}%"
+                )
+
+            with k3:
+
+                st.metric(
+                    "💰 Peak Sales",
+                    f"${highest_sale:,.0f}"
+                )
+
+            st.markdown("---")
+
+            # --------------------------------------------------
+            # ANOMALY VISUALIZATION
+            # --------------------------------------------------
+
+            anomaly_chart = go.Figure()
+
+            anomaly_chart.add_trace(
+                go.Scatter(
+                    x=daily_sales.index,
+                    y=daily_sales.values,
+                    mode="lines",
+                    name="Daily Sales"
+                )
+            )
+
+            anomaly_chart.add_trace(
+                go.Scatter(
+                    x=anomalies.index,
+                    y=anomalies.values,
+                    mode="markers",
+                    marker=dict(
+                        size=12
+                    ),
+                    name="Anomalies"
+                )
+            )
+
+            anomaly_chart.update_layout(
+                template="plotly_dark",
+                height=550,
+                title="Sales Anomaly Detection",
+                hovermode="x unified"
+            )
+
+            st.plotly_chart(
+                anomaly_chart,
+                use_container_width=True
+            )
+
+            # --------------------------------------------------
+            # ANOMALY REPORT
+            # --------------------------------------------------
+
+            st.subheader(
+                "📋 Risk Assessment Report"
+            )
+
+            if not anomalies.empty:
+
+                severity_scores = (
+                    abs(z_scores[anomalies.index]) * 10
+                ).round(2)
+
+                anomaly_report = pd.DataFrame({
+
+                    "Date":
+                    anomalies.index,
+
+                    "Sales":
+                    anomalies.values,
+
+                    "Severity Score":
+                    severity_scores.values
+                })
+
+                st.dataframe(
+                    anomaly_report,
+                    use_container_width=True
+                )
+
+                max_severity = (
+                    anomaly_report[
+                        "Severity Score"
+                    ].max()
+                )
+
+                if max_severity > 25:
+
+                    risk_level = "High Risk"
+
+                elif max_severity > 15:
+
+                    risk_level = "Medium Risk"
+
+                else:
+
+                    risk_level = "Low Risk"
+
+                st.markdown(
+                    f"""
+                    <div class="metric-card">
+
+                    <h3>⚠️ Risk Assessment</h3>
+
+                    <p>
+                    Current Risk Level:
+                    <b>{risk_level}</b>
+                    </p>
+
+                    <p>
+                    Detected anomalies may indicate
+                    unusual purchasing behavior,
+                    inventory discrepancies,
+                    promotional spikes,
+                    or operational issues.
+                    </p>
+
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+            else:
+
+                st.success(
+                    "✅ No significant anomalies detected."
+                )
+
+            # --------------------------------------------------
+            # SALES HEATMAP
+            # --------------------------------------------------
+
+            st.subheader(
+                "🔥 Sales Activity Heatmap"
+            )
+
+            heatmap_df = filtered_df.copy()
+
+            heatmap_df["day"] = (
+                heatmap_df["Date"].dt.day
+            )
+
+            heatmap_df["month"] = (
+                heatmap_df["Date"].dt.month
+            )
+
+            heatmap_matrix = (
+                heatmap_df.pivot_table(
+                    values="Total Amount",
+                    index="day",
+                    columns="month",
+                    aggfunc="sum"
+                )
+            )
+
+            heatmap_chart = px.imshow(
+                heatmap_matrix,
+                aspect="auto",
+                title="Sales Distribution by Day & Month"
+            )
+
+            heatmap_chart.update_layout(
+                template="plotly_dark",
+                height=650
+            )
+
+            st.plotly_chart(
+                heatmap_chart,
+                use_container_width=True
+            )
+
+            # --------------------------------------------------
+            # KEY FINDINGS
+            # --------------------------------------------------
+
+            st.markdown(
+                f"""
+                <div class="metric-card">
+
+                <h3>📌 Key Findings</h3>
+
+                <p>
+                Total Anomalies Detected:
+                <b>{anomaly_count}</b>
+                </p>
+
+                <p>
+                Risk monitoring identified unusual
+                sales patterns requiring review.
+                </p>
+
+                <p>
+                Continuous anomaly tracking helps
+                reduce revenue leakage and improve
+                operational visibility.
+                </p>
+
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+        # ======================================================
+    # 💡 AI PRICING OPTIMIZATION ENGINE
+    # ======================================================
+
+    with tabs[7]:
+
+        st.subheader("💡 AI Pricing Optimization Engine")
+
+        # --------------------------------------------------
+        # DATA PREPARATION
+        # --------------------------------------------------
+
         rl_df = filtered_df.copy()
-        daily_sales = rl_df.groupby("Date")["Total Amount"].sum().values
-        st.write("Number of days in dataset:", len(daily_sales))
 
-    # Normalize
-        sales = (daily_sales - np.mean(daily_sales)) / (np.std(daily_sales) + 1e-5)
+        daily_sales = (
+            rl_df
+            .groupby("Date")["Total Amount"]
+            .sum()
+        )
 
+        if len(daily_sales) < 10:
 
-    # ---------------- ENVIRONMENT ----------------
+            st.warning(
+                "Insufficient data available for Reinforcement Learning analysis."
+            )
+
+        else:
+
+            demand_levels = pd.qcut(
+                daily_sales,
+                q=3,
+                labels=[
+                    "Low",
+                    "Medium",
+                    "High"
+                ]
+            )
+
+            states = demand_levels.values
+
+            actions = [
+                "Decrease Price",
+                "Keep Same",
+                "Increase Price"
+            ]
+
+            state_mapping = {
+                "Low": 0,
+                "Medium": 1,
+                "High": 2
+            }
+
+            n_states = 3
+            n_actions = 3
+
+            # --------------------------------------------------
+            # Q-TABLE INITIALIZATION
+            # --------------------------------------------------
+
+            q_table = np.zeros(
+                (
+                    n_states,
+                    n_actions
+                )
+            )
+
+            learning_rate = 0.10
+
+            discount_factor = 0.90
+
+            exploration_rate = 0.20
+
+            # --------------------------------------------------
+            # Q-LEARNING TRAINING
+            # --------------------------------------------------
+
+            training_episodes = 200
+
+            for _ in range(training_episodes):
+
+                for i in range(len(states) - 1):
+
+                    current_state = (
+                        state_mapping[
+                            states[i]
+                        ]
+                    )
+
+                    if (
+                        np.random.rand()
+                        <
+                        exploration_rate
+                    ):
+
+                        action = (
+                            np.random.randint(
+                                n_actions
+                            )
+                        )
+
+                    else:
+
+                        action = (
+                            np.argmax(
+                                q_table[
+                                    current_state
+                                ]
+                            )
+                        )
+
+                    price_factor = [
+                        0.90,
+                        1.00,
+                        1.10
+                    ][action]
+
+                    reward = (
+                        daily_sales.iloc[i]
+                        *
+                        price_factor
+                    )
+
+                    next_state = (
+                        state_mapping[
+                            states[i + 1]
+                        ]
+                    )
+
+                    q_table[
+                        current_state,
+                        action
+                    ] += (
+                        learning_rate
+                        *
+                        (
+                            reward
+                            +
+                            discount_factor
+                            *
+                            np.max(
+                                q_table[
+                                    next_state
+                                ]
+                            )
+                            -
+                            q_table[
+                                current_state,
+                                action
+                            ]
+                        )
+                    )
+
+                        # --------------------------------------------------
+            # AI DECISION CENTER
+            # --------------------------------------------------
+
+            optimal_actions = np.argmax(
+                q_table,
+                axis=1
+            )
+
+            action_names = [
+                actions[i]
+                for i in optimal_actions
+            ]
+
+            k1, k2, k3 = st.columns(3)
+
+            with k1:
+
+                st.markdown(
+                    f"""
+                    <div class="metric-card">
+
+                    <h4>📉 Low Demand</h4>
+
+                    <h3>{action_names[0]}</h3>
+
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+            with k2:
+
+                st.markdown(
+                    f"""
+                    <div class="metric-card">
+
+                    <h4>📊 Medium Demand</h4>
+
+                    <h3>{action_names[1]}</h3>
+
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+            with k3:
+
+                st.markdown(
+                    f"""
+                    <div class="metric-card">
+
+                    <h4>📈 High Demand</h4>
+
+                    <h3>{action_names[2]}</h3>
+
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+            st.markdown("---")
+
+            # --------------------------------------------------
+            # AI PRICING STRATEGY MATRIX
+            # --------------------------------------------------
+
+            st.subheader(
+                "🧠 AI Pricing Strategy Matrix"
+            )
+
+            q_table_df = pd.DataFrame(
+                q_table,
+                index=[
+                    "Low Demand",
+                    "Medium Demand",
+                    "High Demand"
+                ],
+                columns=actions
+            )
+
+            st.dataframe(
+                q_table_df.round(2),
+                use_container_width=True
+            )
+
+            # --------------------------------------------------
+            # AI REVENUE OPTIMIZATION HEATMAP
+            # --------------------------------------------------
+
+            strategy_chart = px.imshow(
+                q_table_df,
+                text_auto=".1f",
+                aspect="auto",
+                title="AI Revenue Optimization Matrix"
+            )
+
+            strategy_chart.update_layout(
+                template="plotly_dark",
+                height=600
+            )
+
+            st.plotly_chart(
+                strategy_chart,
+                use_container_width=True
+            )
+
+            # --------------------------------------------------
+            # BUSINESS RECOMMENDATION
+            # --------------------------------------------------
+
+            st.markdown(
+                """
+                <div class="metric-card">
+
+                <h3>🚀 AI Pricing Recommendation</h3>
+
+                <p>
+                The Reinforcement Learning agent evaluates
+                demand conditions and identifies pricing
+                strategies that maximize long-term revenue.
+                </p>
+
+                <p>
+                These recommendations can support dynamic
+                pricing, promotion planning, inventory
+                optimization, and revenue growth initiatives.
+                </p>
+
+                <p>
+                AI-driven pricing decisions help retailers
+                respond proactively to changing market demand.
+                </p>
+
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+        
+    # ======================================================
+    # 🧠 DEEP REINFORCEMENT LEARNING TAB
+    # ======================================================
+
+    with tabs[8]:
+
+        st.subheader(
+            "🧠 Deep Reinforcement Learning (DQN for Dynamic Pricing)"
+        )
+
+        # --------------------------------------------------
+        # Data Preparation
+        # --------------------------------------------------
+
+        rl_df = filtered_df.copy()
+
+        daily_sales = (
+            rl_df.groupby("Date")["Total Amount"]
+            .sum()
+            .values
+        )
+
+        st.write(
+            f"Number of days in dataset: {len(daily_sales)}"
+        )
+
+        # Normalize sales values
+        sales = (
+            daily_sales - np.mean(daily_sales)
+        ) / (
+            np.std(daily_sales) + 1e-5
+        )
+
+        # --------------------------------------------------
+        # Pricing Environment
+        # --------------------------------------------------
+
         class PricingEnv:
 
-           def __init__(self, sales):
+            def __init__(self, sales_data):
 
-             self.sales = sales
-             self.t = 0
-             self.n = len(sales)
+                self.sales = sales_data
+                self.t = 0
+                self.n = len(sales_data)
+                self.inventory = 1000
 
-             # Simulated inventory
-             self.inventory = 1000
+            def reset(self):
 
-           def reset(self):
+                self.t = 0
+                self.inventory = 1000
 
-             self.t = 0
-             self.inventory = 1000
+                return np.array([
+                    self.sales[self.t],
+                    self.inventory / 1000
+                ])
 
-             return np.array([
-             self.sales[self.t],
-             self.inventory / 1000
-             ])
+            def step(self, action):
 
-           def step(self, action):
+                current_demand = (
+                    self.sales[self.t]
+                )
 
-             current_demand = self.sales[self.t]
+                # Pricing Actions
+                # 0 = Decrease Price
+                # 1 = Keep Same
+                # 2 = Increase Price
 
-        # ---------------- ACTIONS ----------------
-        # 0 = decrease
-        # 1 = same
-        # 2 = increase
+                price_change = [
+                    -0.10,
+                    0.00,
+                    0.10
+                ][action]
 
-             price_change = [-0.10, 0.0, 0.10][action]
+                # Demand Elasticity
+                elasticity = 1.5
 
-        # ---------------- DEMAND ELASTICITY ----------------
-        # higher price -> lower demand
-             elasticity = 1.5
+                adjusted_demand = (
+                    current_demand *
+                    (1 - price_change * elasticity)
+                )
 
-             adjusted_demand = current_demand * (
-             1 - price_change * elasticity
-             )
+                adjusted_demand = max(
+                    adjusted_demand,
+                    0
+                )
 
-             adjusted_demand = max(adjusted_demand, 0)
+                # Revenue Calculation
+                revenue = (
+                    adjusted_demand *
+                    (1 + price_change)
+                )
 
-             # ---------------- REVENUE ----------------
-             revenue = adjusted_demand * (1 + price_change)
+                # Inventory Update
+                sold_units = (
+                    adjusted_demand * 10
+                )
 
-             # ---------------- INVENTORY EFFECT ----------------
-             sold_units = adjusted_demand * 10
+                self.inventory -= sold_units
 
-             self.inventory -= sold_units
-             self.inventory = max(self.inventory, 0)
+                self.inventory = max(
+                    self.inventory,
+                    0
+                )
 
-             # ---------------- INVENTORY PENALTY ----------------
-             inventory_penalty = 0
+                # Inventory Penalty
+                inventory_penalty = 0
 
-             if self.inventory < 100:
-              inventory_penalty = -20
+                if self.inventory < 100:
+                    inventory_penalty = -20
 
-             # ---------------- FINAL REWARD ----------------
-             reward = revenue + inventory_penalty
+                # Final Reward
+                reward = (
+                    revenue +
+                    inventory_penalty
+                )
 
-             # ---------------- NEXT STEP ----------------
-             self.t += 1
+                # Move to Next Step
+                self.t += 1
 
-             done = (
-             self.t >= self.n - 1
-             or self.inventory <= 0
-             )
+                done = (
+                    self.t >= self.n - 1
+                    or self.inventory <= 0
+                )
 
-             next_state = (
-             np.array([
-             self.sales[self.t],
-             self.inventory / 1000
-             ])
-             if not done else np.array([0, 0])
-             )
+                if not done:
 
-             return next_state, reward, done
-               
+                    next_state = np.array([
+                        self.sales[self.t],
+                        self.inventory / 1000
+                    ])
+
+                else:
+
+                    next_state = np.array([
+                        0,
+                        0
+                    ])
+
+                return (
+                    next_state,
+                    reward,
+                    done
+                )
+
+        # --------------------------------------------------
+        # Data Validation
+        # --------------------------------------------------
+
         if len(daily_sales) < 10:
-             st.warning("Need at least 10 days of sales data for DQN training.")
-             st.stop()       
+
+            st.warning(
+                "Need at least 10 days of sales data "
+                "for DQN training."
+            )
+
+            st.stop()
 
         env = PricingEnv(sales)
 
-    # ---------------- DQN MODEL ----------------
+        # --------------------------------------------------
+        # Deep Q-Network Architecture
+        # --------------------------------------------------
+
         class DQN(nn.Module):
-           def __init__(self):
-             super(DQN, self).__init__()
-             self.net = nn.Sequential(
-                nn.Linear(2, 64),
-                nn.ReLU(),
-                nn.Linear(64, 64),
-                nn.ReLU(),
-                nn.Linear(64, 32),
-                nn.ReLU(),
-                nn.Linear(32,3)
-            )
 
-           def forward(self, x):
-             return self.net(x)
+            def __init__(self):
 
-        model = DQN()
-        optimizer = optim.Adam(model.parameters(), lr=0.001)
-        loss_fn = nn.MSELoss()
+                super().__init__()
 
-    # ---------------- MEMORY ----------------
-        memory = deque(maxlen=2000)
+                self.network = nn.Sequential(
+                    nn.Linear(2, 64),
+                    nn.ReLU(),
+
+                    nn.Linear(64, 64),
+                    nn.ReLU(),
+
+                    nn.Linear(64, 32),
+                    nn.ReLU(),
+
+                    nn.Linear(32, 3)
+                )
+
+            def forward(self, x):
+
+                return self.network(x)
+
+        dqn_model = DQN()
+
+        optimizer = optim.Adam(
+            dqn_model.parameters(),
+            lr=0.001
+        )
+
+        loss_function = nn.MSELoss()
+
+        # --------------------------------------------------
+        # Experience Replay Memory
+        # --------------------------------------------------
+
+        replay_memory = deque(
+            maxlen=2000
+        )
 
         gamma = 0.95
-        epsilon = 1.0
+
+        epsilon = 1.00
         epsilon_decay = 0.995
         epsilon_min = 0.01
 
-    # ---------------- TRAIN ----------------
-        episodes = st.slider("Training Episodes", 5, 20, 10)
+        # --------------------------------------------------
+        # Training Controls
+        # --------------------------------------------------
+
+        training_episodes = st.slider(
+            "Training Episodes",
+            min_value=5,
+            max_value=20,
+            value=10
+        )
+
+        # --------------------------------------------------
+        # DQN Training
+        # --------------------------------------------------
+
         if st.button("Train DQN Model"):
 
-          rewards_history = []
+            rewards_history = []
 
-          for ep in range(episodes):
-             state = env.reset()
-             total_reward = 0
+            for episode in range(
+                training_episodes
+            ):
 
-             while True:
-                state_tensor = torch.FloatTensor(state)
+                state = env.reset()
 
-                # epsilon-greedy
-                if random.random() < epsilon:
-                   action = random.randint(0,2)
-                else:
-                   with torch.no_grad():
-                    action = torch.argmax(model(state_tensor)).item()
+                total_reward = 0
 
-                next_state, reward, done = env.step(action)
+                while True:
 
-                memory.append((state, action, reward, next_state, done))
+                    state_tensor = (
+                        torch.FloatTensor(state)
+                    )
 
-                state = next_state
-                total_reward += reward
+                    # Epsilon-Greedy Policy
+                    if random.random() < epsilon:
 
-                # Train from memory
-                if len(memory) > 16:
-                  batch = random.sample(memory, 16)
+                        action = random.randint(
+                            0,
+                            2
+                        )
 
-                  for s, a, r, ns, d in batch:
-                    s = torch.FloatTensor(s)
-                    ns = torch.FloatTensor(ns)
+                    else:
 
-                    target = r
-                    if not d:
-                        target += gamma * torch.max(model(ns)).item()
+                        with torch.no_grad():
 
-                    target_f = model(s).clone().detach()
-                    target_f[a] = target
+                            action = torch.argmax(
+                                dqn_model(state_tensor)
+                            ).item()
 
-                    loss = loss_fn(model(s), target_f.detach())
+                    (
+                        next_state,
+                        reward,
+                        done
+                    ) = env.step(action)
 
-                    optimizer.zero_grad()
-                    loss.backward()
-                    optimizer.step()
+                    replay_memory.append(
+                        (
+                            state,
+                            action,
+                            reward,
+                            next_state,
+                            done
+                        )
+                    )
 
-                if done:
-                  break
+                    state = next_state
 
-             rewards_history.append(total_reward)
+                    total_reward += reward
 
-             if epsilon > epsilon_min:
-                epsilon *= epsilon_decay
+                    # Experience Replay Training
+                    if len(replay_memory) > 16:
 
-    # ---------------- RESULTS ----------------
-          st.write("### 📈 Training Reward Progress")
+                        batch = random.sample(
+                            replay_memory,
+                            16
+                        )
 
-          fig = px.line(y=rewards_history, title="DQN Learning Curve")
-          st.plotly_chart(fig, use_container_width=True)
+                        for (
+                            s,
+                            a,
+                            r,
+                            ns,
+                            d
+                        ) in batch:
 
-          st.success("✅ Deep RL Agent trained successfully!")
+                            s = torch.FloatTensor(s)
+                            ns = torch.FloatTensor(ns)
 
-    # ---------------- POLICY ----------------
-          st.write("### 🧠 Learned Pricing Policy")
+                            target = r
 
-          actions_map = ["Decrease Price", "Keep Same", "Increase Price"]
+                            if not d:
 
-# Ensure valid states
-          test_demands = np.linspace( float(min(sales)), float(max(sales)), 10 ) 
-          inventory_levels = [1.0, 0.7, 0.4] 
-          policy = [] 
-          for demand in test_demands: 
-           for inv in inventory_levels: 
-            state = torch.FloatTensor([ demand, inv ]) 
-            with torch.no_grad(): 
-                     action = torch.argmax( model(state) ).item() 
-            policy.append({ 
-                         "Demand": round(demand, 2), 
-                         "Inventory": int(inv * 1000), 
-                         "Recommended Action": actions_map[action] }) 
-          policy_df = pd.DataFrame(policy) 
-          st.dataframe(policy_df)
+                                target += (
+                                    gamma *
+                                    torch.max(
+                                        dqn_model(ns)
+                                    ).item()
+                                )
 
-          st.info("💡 This model learns optimal pricing strategy dynamically using Deep Q-Learning.")
+                            target_values = (
+                                dqn_model(s)
+                                .clone()
+                                .detach()
+                            )
+
+                            target_values[a] = target
+
+                            loss = loss_function(
+                                dqn_model(s),
+                                target_values.detach()
+                            )
+
+                            optimizer.zero_grad()
+
+                            loss.backward()
+
+                            optimizer.step()
+
+                    if done:
+                        break
+
+                rewards_history.append(
+                    total_reward
+                )
+
+                if epsilon > epsilon_min:
+
+                    epsilon *= epsilon_decay
+
+            # --------------------------------------------------
+            # Training Results
+            # --------------------------------------------------
+
+            st.write(
+                "### 📈 Training Reward Progress"
+            )
+
+            learning_curve = px.line(
+                y=rewards_history,
+                title="DQN Learning Curve"
+            )
+
+            st.plotly_chart(
+                learning_curve,
+                use_container_width=True
+            )
+
+            st.success(
+                "✅ Deep RL Agent trained successfully!"
+            )
+
+            # --------------------------------------------------
+            # Learned Policy
+            # --------------------------------------------------
+
+            st.write(
+                "### 🧠 Learned Pricing Policy"
+            )
+
+            actions_map = [
+                "Decrease Price",
+                "Keep Same",
+                "Increase Price"
+            ]
+
+            test_demands = np.linspace(
+                float(min(sales)),
+                float(max(sales)),
+                10
+            )
+
+            inventory_levels = [
+                1.0,
+                0.7,
+                0.4
+            ]
+
+            policy_results = []
+
+            for demand in test_demands:
+
+                for inventory in inventory_levels:
+
+                    state = torch.FloatTensor([
+                        demand,
+                        inventory
+                    ])
+
+                    with torch.no_grad():
+
+                        best_action = (
+                            torch.argmax(
+                                dqn_model(state)
+                            ).item()
+                        )
+
+                    policy_results.append({
+                        "Demand":
+                            round(demand, 2),
+
+                        "Inventory":
+                            int(inventory * 1000),
+
+                        "Recommended Action":
+                            actions_map[
+                                best_action
+                            ]
+                    })
+
+            policy_df = pd.DataFrame(
+                policy_results
+            )
+
+            st.dataframe(
+                policy_df,
+                use_container_width=True
+            )
+
+            st.info(
+                "💡 This Deep Q-Network learns "
+                "dynamic pricing strategies based "
+                "on demand patterns and inventory levels."
+            )
+
+# ==========================================================
+# NO DATA UPLOADED
+# ==========================================================
+
 else:
-    st.info("Upload a dataset to begin 🚀")
+
+    st.info(
+        "Upload a dataset to begin 🚀"
+    )
