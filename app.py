@@ -1140,7 +1140,7 @@ if uploaded_file is not None:
             )
 
 
-        # ======================================================
+    # ======================================================
     # 📂 DATA QUALITY & EXPLORATORY ANALYSIS
     # ======================================================
 
@@ -1404,7 +1404,7 @@ if uploaded_file is not None:
                 use_container_width=True
             )
 
-        # ======================================================
+    # ======================================================
     # 📈 SALES FORECASTING TAB
     # ======================================================
 
@@ -1975,23 +1975,30 @@ if uploaded_file is not None:
 
         with k1:
 
-            st.metric(
-                "🏆 Best Model",
-                best_model_name
+            st.markdown(
+            "<div class='metric-card'>"
+            "<h4>🏆 Best Model</h4>"
+            f"<h2>{best_model_name}</h2>"
+            "</div>",
+            unsafe_allow_html=True
             )
 
         with k2:
-
-            st.metric(
-                "📈 Best R²",
-                f"{best_r2:.3f}"
+                st.markdown(
+            "<div class='metric-card'>"
+            "<h4>📈 Best R²</h4>"
+            f"<h2>{best_r2:.3f}</h2>"
+            "</div>",
+            unsafe_allow_html=True
             )
 
         with k3:
-
-            st.metric(
-                "🎯 Lowest RMSE",
-                f"{lowest_rmse:.2f}"
+            st.markdown(
+            "<div class='metric-card'>"
+            "<h4>🎯 Lowest RMSE</h4>"
+            f"<h2>{lowest_rmse:.2f}</h2>"
+            "</div>",
+            unsafe_allow_html=True
             )
 
         st.markdown("---")
@@ -2237,7 +2244,7 @@ if uploaded_file is not None:
                 use_container_width=True
             )
 
-        # ======================================================
+    # ======================================================
     # 🚨 RISK & ANOMALY MONITORING
     # ======================================================
 
@@ -2288,25 +2295,31 @@ if uploaded_file is not None:
             k1, k2, k3 = st.columns(3)
 
             with k1:
-
-                st.metric(
-                    "🚨 Anomalies",
-                    anomaly_count
-                )
+              st.markdown(
+        "<div class='metric-card'>"
+        "<h4>🚨 Anomalies</h4>"
+        f"<h2>{anomaly_count}</h2>"
+        "</div>",
+             unsafe_allow_html=True
+             )
 
             with k2:
-
-                st.metric(
-                    "📊 Risk Rate",
-                    f"{risk_rate:.1f}%"
-                )
+              st.markdown(
+        "<div class='metric-card'>"
+        "<h4>📊 Risk Rate</h4>"
+        f"<h2>{risk_rate:.1f}%</h2>"
+        "</div>",
+             unsafe_allow_html=True
+            )
 
             with k3:
-
-                st.metric(
-                    "💰 Peak Sales",
-                    f"${highest_sale:,.0f}"
-                )
+             st.markdown(
+        "<div class='metric-card'>"
+        "<h4>💰 Peak Sales</h4>"
+        f"<h2>${highest_sale:,.0f}</h2>"
+        "</div>",
+            unsafe_allow_html=True
+            )
 
             st.markdown("---")
 
