@@ -14,6 +14,7 @@ from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import IsolationForest
 import xgboost as xgb
+import sqlite3
 
 from statsmodels.tsa.arima.model import ARIMA
 
@@ -625,6 +626,19 @@ if uploaded_file is not None:
         df["Customer ID"] = 0
 
     # ======================================================
+    # 💾 STORE DATA IN SQLITE DATABASE
+    # ======================================================
+
+    conn = sqlite3.connect("retail_ai.db")
+
+    df.to_sql(
+        "retail_sales",
+        conn,
+        if_exists="replace",
+        index=False
+    )
+
+    # ======================================================
     # 🎛 SMART FILTER CONTROL PANEL
     # ======================================================
 
@@ -733,21 +747,40 @@ if uploaded_file is not None:
 
     st.subheader("📊 Key Metrics")
 
-    total_revenue = filtered_df["Total Amount"].sum()
+    # --------------------------------------------------
+    # SQL KPI Queries
+    # --------------------------------------------------
 
-    total_transactions = (
-        filtered_df["Transaction ID"]
-        .nunique()
-    )
+    total_revenue = pd.read_sql(
+        """
+        SELECT
+            SUM([Total Amount]) AS Revenue
+        FROM retail_sales
+        """,
+        conn
+    ).iloc[0]["Revenue"]
+
+    total_transactions = pd.read_sql(
+        """
+        SELECT
+            COUNT(DISTINCT [Transaction ID]) AS Transactions
+        FROM retail_sales
+        """,
+        conn
+    ).iloc[0]["Transactions"]
+
+    total_customers = pd.read_sql(
+        """
+        SELECT
+            COUNT(DISTINCT [Customer ID]) AS Customers
+        FROM retail_sales
+        """,
+        conn
+    ).iloc[0]["Customers"]
 
     average_order_value = (
         total_revenue /
         max(total_transactions, 1)
-    )
-
-    total_customers = (
-        filtered_df["Customer ID"]
-        .nunique()
     )
 
     # KPI Cards Layout
@@ -3247,3 +3280,8 @@ else:
     st.info(
         "Upload a dataset to begin 🚀"
     )
+
+try:
+    conn.close()
+except:
+    pass
